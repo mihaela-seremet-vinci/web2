@@ -7,4 +7,5 @@ interface Film {
   description?: string; 
   imageUrl?: string; 
 }
-export type {Film};
+type NewFilm = Omit<Film, "id">
+export type {Film, NewFilm};

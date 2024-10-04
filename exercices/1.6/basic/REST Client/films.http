@@ -21,3 +21,18 @@ Content-Type: application/json
     "budget": 165,
     "imageUrl": "https://upload.wikimedia.org/wikipedia/en/8/8e/Dune_Part_Two_poster.jpg"
 }
+
+
+### Delete a film
+DELETE {{baseUrl}}/films/3
+
+
+### Update film with ID == 2
+PATCH {{baseUrl}}/films/1
+Content-Type: application/json
+
+{
+    "title":"test film ",
+    "budget": 100
+}
+

@@ -28,11 +28,11 @@ DELETE {{baseUrl}}/films/3
 
 
 ### Update film with ID == 2
-PATCH {{baseUrl}}/films/1
+PATCH {{baseUrl}}/films/2
 Content-Type: application/json
 
 {
-    "title":"test film ",
+    "title":"test film 2",
     "budget": 100
 }
 

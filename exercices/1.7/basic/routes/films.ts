@@ -1,6 +1,9 @@
 import {Router} from "express"; 
-
 import { Film, NewFilm } from "../types";
+
+import path from "node:path"; //
+import { parse, serialize } from "../utils/json"; //
+const jsonDbPath = path.join(__dirname, "/../data/films.json"); //
 
 const router = Router();
 
@@ -32,23 +35,22 @@ const defaultFilms: Film[]= [
       },
 
 ]
-//afficher les films selon la duree min, s'il y'a ce parametre  //apres il y'a dans REST des trucs qui permettent de faire des test avec ça 
 
+//afficher les films selon la duree min, s'il y'a ce parametre  //apres il y'a dans REST des trucs qui permettent de faire des test avec ça 
 router.get("/",(req,res)=>{
+  const films = parse(jsonDbPath, defaultFilms); 
   if (req.query["minimum-duration"] === undefined) {
-    console.log("undef")
-    return res.json(defaultFilms);
+    return res.json(films);
     
   }
   const minDuration = Number(req.query["minimum-duration"]);
 
   if (isNaN(minDuration) || minDuration <= 0) {
     //res.json("Wrong minimum duration"); 
-    res.sendStatus
+    res.sendStatus(400); 
   }
 
-
-  const filteredFilms = defaultFilms.filter((film) => {
+  const filteredFilms = films.filter((film) => {
     return film.duration >= minDuration;
 });
 
@@ -56,10 +58,10 @@ router.get("/",(req,res)=>{
 }); 
 
 //afficher les films selon l'id(dans l'url )
-
 router.get("/:id", (req, res) => {
   const id = Number(req.params.id);
-  const  film = defaultFilms.find((film) => film.id === id);
+  const films = parse(jsonDbPath, defaultFilms); 
+  const  film = films.find((film) => film.id === id);
   if (!film) {
     return res.sendStatus(404);
   }
@@ -87,18 +89,20 @@ router.post("/", (req,res)=>{
     ("imageUrl" in body &&
       (typeof body.imageUrl !== "string" || !body.imageUrl.trim()))
   ) {
-    return res.json("Wrong body format"); 
+    return res.sendStatus(400); 
   }
 
   const newFilm = body as NewFilm; //avoir ts NewFilm, mettre dans l'import NewFilm 
+  
+const films = parse(jsonDbPath, defaultFilms); 
 
   const nextId =
-    defaultFilms.reduce((acc, film) => (film.id > acc ? film.id : acc), 0) + 1; //pas compris 
+  defaultFilms.reduce((acc, film) => (film.id > acc ? film.id : acc), 0) + 1; //pas compris 
 
   const addedFilm: Film = { id: nextId, ...newFilm }; //okk???
 
-  defaultFilms.push(addedFilm);
-
+  films.push(addedFilm);
+  serialize(jsonDbPath, films); 
   return res.json(addedFilm);
 
 })
@@ -107,12 +111,13 @@ router.post("/", (req,res)=>{
 
 router.delete("/:id", (req, res) => {
   const id = Number(req.params.id);
-
-  const index = defaultFilms.findIndex((film) => film.id === id);
+  const films = parse(jsonDbPath, defaultFilms); 
+  const index = films.findIndex((film) => film.id === id);
   if (index === -1) {
     return res.sendStatus(404);
   }
-  const deletedElements = defaultFilms.splice(index, 1); // splice() returns an array of the deleted elements
+  const deletedElements = films.splice(index, 1); // splice() returns an array of the deleted elements
+  serialize(jsonDbPath, films); 
   return res.json(deletedElements[0]);
 });
 
@@ -121,10 +126,11 @@ router.delete("/:id", (req, res) => {
 
 router.patch("/:id", (req, res) => {
   const id = Number(req.params.id);
+  const films = parse(jsonDbPath, defaultFilms); 
   if (isNaN(id)) {
     return res.sendStatus(400);
   }
-  const filmToUpdate = defaultFilms.find((film) => film.id === id);
+  const filmToUpdate = films.find((film) => film.id === id);
   if (filmToUpdate === undefined) {
     return res.sendStatus(404);
   }
@@ -151,8 +157,8 @@ router.patch("/:id", (req, res) => {
 
   const updatedFilm = { ...filmToUpdate, ...body };
 
-  defaultFilms [defaultFilms.indexOf(filmToUpdate)] = updatedFilm;
-
+  films [films.indexOf(filmToUpdate)] = updatedFilm;
+  serialize(jsonDbPath, films); 
   return res.send(updatedFilm);
 });
 
@@ -188,33 +194,28 @@ router.put("/:id", (req, res) => {
     return res.sendStatus(400);
   }
 
-  const indexOfFilmToUpdate = defaultFilms.findIndex((film) => film.id === id);
+  const films = parse(jsonDbPath, defaultFilms);
+  const indexOfFilmToUpdate = films.findIndex((film) => film.id === id);
   if (indexOfFilmToUpdate < 0) {
     const newFilm = body as NewFilm;
 
-    
   const nextId =
-    defaultFilms.reduce((acc, film) => (film.id > acc ? film.id : acc), 0) + 1;
-
+    films.reduce((acc, film) => (film.id > acc ? film.id : acc), 0) + 1;
     const addedFilm = { id: nextId, ...newFilm };
+    films.push(addedFilm);
 
-    defaultFilms.push(addedFilm);
-
+    serialize(jsonDbPath, films);
     return res.json(addedFilm);
   }
 
   
-  const updatedFilm = { ...defaultFilms[indexOfFilmToUpdate], ...body } as Film;
+  const updatedFilm = { ...films[indexOfFilmToUpdate], ...body } as Film;
 
-  defaultFilms[indexOfFilmToUpdate] = updatedFilm;
-
+  films[indexOfFilmToUpdate] = updatedFilm;
+  serialize(jsonDbPath, films); 
   return res.send(updatedFilm);
 });
 
 
 
-router.get("/", (_req, res) => {
-    return res.json(defaultFilms);
-  });
-  
   export default router;

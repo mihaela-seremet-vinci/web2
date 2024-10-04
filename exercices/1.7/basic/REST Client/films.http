@@ -1,0 +1,38 @@
+@baseUrl = http://localhost:3000
+
+## Read all films
+GET http://localhost:3000/films
+
+
+### READ ALL FILTERED : Lire toutes les ressources de la collection selon le filtre donné
+GET {{baseUrl}}/films/?minimum-duration=130
+
+### READ ONE : Lire la ressource identifiée
+GET {{baseUrl}}/films/3
+
+###CREATE ONE : Créer une ressource basée sur les données de la requête
+POST {{baseUrl}}/films
+Content-Type: application/json  
+
+{
+    "title": "Dune: Part Two",
+    "duration": 155,
+    "director": "Denis Villeneuve",
+    "budget": 165,
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/8/8e/Dune_Part_Two_poster.jpg"
+}
+
+
+### Delete a film
+DELETE {{baseUrl}}/films/3
+
+
+### Update film with ID == 2
+PATCH {{baseUrl}}/films/1
+Content-Type: application/json
+
+{
+    "title":"test film ",
+    "budget": 100
+}
+

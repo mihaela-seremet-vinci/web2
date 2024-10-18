@@ -1,5 +1,8 @@
 import PageTitle from "../PageTitle";
 import Cinema from "../Cinema";
+import Footer from "../Footer"; 
+import Header from "../Header"; //NOT USED CUZ TAKES PLACE, BUT THE WORKS THE SAME AS THE FOOTER 
+
 
 const App = () => {
   const pageTitle = "Informations sur les films dans les cinémas";
@@ -54,6 +57,8 @@ const moviesCinema2 = [
       <Cinema name={cinema1Name} movies= {moviesCinema1} />
 
       <Cinema name={cinema2Name} movies={moviesCinema2} />
+
+      <Footer url={"https://images.unsplash.com/photo-1728878039239-6b2f85e3c361?q=80&w=2831&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"} children={undefined} />
     </div>
   );
 };

@@ -1,4 +1,4 @@
-
+import { useState } from "react";
 import { Movie } from "../types";
 import "./MovieCard.css";
 
@@ -8,10 +8,12 @@ interface MovieCardProps {
 }
 
 const MovieCard = ({ movie }: MovieCardProps) => {
+  const [click, setClick] = useState(false);
   return (
+
     <div className="card">
      
-      <div className="card-body">
+      <div  onClick={ () => setClick(!click)}  className="card-body">
         <h3 className="card-title">{movie.title}</h3>
         {movie.imageUrl && (
         <img src={movie.imageUrl} className="card-img-top" alt={movie.title} />
@@ -27,9 +29,10 @@ const MovieCard = ({ movie }: MovieCardProps) => {
             <strong>Budget :</strong> {movie.budget} millions de dollars
           </p>
         )}
+        
         {movie.description && (
-          <p className="card-text">
-            <strong>Description :</strong> {movie.description}
+          <p  className="card-text">
+            <strong>Description :</strong> {click ? <p>{movie.description}</p> : null}
           </p>
         )}
       </div>

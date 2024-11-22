@@ -1,9 +1,8 @@
 interface Movie {
-    id: number;
     title: string;
     director: string;
     duration: number;
-    image ? : string;
+    imageUrl ? : string;
     description ? : string;
     budget ? : number;
 

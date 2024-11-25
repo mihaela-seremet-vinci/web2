@@ -8,8 +8,12 @@ interface Joke {
 
 function App() {
   const[joke, setJoke] = useState<Joke | null>(null); 
+  const[isNew, setIsNew] = useState<boolean>(false);
 
-  useEffect(() => {
+  
+   
+    const useFetch=() => { 
+
     fetch("https://v2.jokeapi.dev/joke/Dark?type=single")
       .then((response) => {
         return response.json();
@@ -23,7 +27,16 @@ function App() {
       .catch((err) => {
         console.error("HomePage::error: ", err);
       });
-  }, []);
+
+    }
+
+     
+     useEffect(() => {
+        useFetch();
+        setInterval(() => { useFetch(); }, 5000);  
+     }, []);
+
+
   
   if (!joke) {
     return <p>Loading...</p>

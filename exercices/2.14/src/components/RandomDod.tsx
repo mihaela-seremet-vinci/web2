@@ -7,12 +7,21 @@ interface Dog {
 
 const RandomdDod = () => {  
     const[dog, setDog] = useState<Dog | null>(null);
+    const [isHovered, setIsHovered] = useState(false);
+
+    useEffect(() => {fetchDog()}, []);
 
     useEffect(() => { 
-        fetchDog();
-        setInterval(() => { fetchDog(); }, 5000); 
-        
-    }, [setDog]) ;
+       // setInterval(() => { fetchDog(); }, 5000); 
+
+       const interval = setInterval(() => {    
+        if (!isHovered) {
+          fetchDog();
+        }
+      }, 5000);
+  
+      return () => clearInterval(interval); 
+    }, [isHovered]) ;
 
 
     const fetchDog = async () => {  
@@ -33,7 +42,13 @@ const RandomdDod = () => {
     return (
         <>
             <h1>DOG</h1>
-            <img src={dog?.photo} alt="dog" style={{ maxHeight: 100 }} />  
+            <img src={dog?.photo} alt="dog" style={{ maxHeight: 100 }} 
+            onMouseEnter={() => {
+                setIsHovered(true);
+            }}
+            onMouseLeave={() => setIsHovered(false)} />  
+
+            
         </>
     )
 }

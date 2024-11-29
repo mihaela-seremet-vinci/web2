@@ -42,24 +42,38 @@ const App = () => {
 
   const fetchPizzas = async () => {
     try {
-      const response = await fetch("http://localhost:3000/pizzas");
-
-      if (!response.ok)
-        throw new Error(
-          `fetch error : ${response.status} : ${response.statusText}`
-        );
-
-      const pizzas = await response.json();
+      const pizzas = await getAllPizzas(); //voir la fonction en bas de la page 
       setPizzas(pizzas);
     } catch (err) {
       console.error("HomePage::error: ", err);
     }
   };
   
-  const addPizza = (newPizza: NewPizza) => {
-    const pizzaAdded = { ...newPizza, id: nextPizzaId(pizzas) };
-    setPizzas([...pizzas, pizzaAdded]);
+  const addPizza = async (newPizza: NewPizza) => {
+    try {
+      const options = {
+        method: "POST",
+        body: JSON.stringify(newPizza),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+
+      const response = await fetch("http://localhost:3000/pizzas", options); // fetch retourne une "promise" => on attend la réponse
+
+      if (!response.ok)
+        throw new Error(
+          `fetch error : ${response.status} : ${response.statusText}`
+        );
+
+      const createdPizza = await response.json(); // json() retourne une "promise" => on attend les données
+
+      setPizzas([...pizzas, createdPizza]);
+    } catch (err) {
+      console.error("AddPizzaPage::error: ", err);
+    }
   };
+
 
   const handleHeaderClick = () => {
     setActionToBePerformed(true);
@@ -97,10 +111,29 @@ const App = () => {
   );
 };
 
-const nextPizzaId = (pizzas: Pizza[]) => {
+/*const nextPizzaId = (pizzas: Pizza[]) => {
   const ids = pizzas.map((pizza) => pizza.id);
   return Math.max(...ids) + 1;
-};
+};*/
+
+
+async function getAllPizzas() {
+  try {
+    const response = await fetch("http://localhost:3000/pizzas");
+
+    if (!response.ok)
+      throw new Error(
+        `fetch error : ${response.status} : ${response.statusText}`
+      );
+
+    const pizzas = await response.json();
+
+    return pizzas;
+  } catch (err) {
+    console.error("getAllPizzas::error: ", err);
+    throw err;
+  }
+}
 
 
 export default App;

@@ -1,35 +1,66 @@
 import { Router } from "express";
-import {  NewFilm } from "../types";
+
+import { NewFilm } from "../types";
+
+import { containsOnlyExpectedKeys } from "../utils/validate";
+
 import {
-  readAllFilms,
-  readOneFilm,
-  createNewFilm,
-  deleteOneFilm,
-  updateFilm,
-  updateOrCreateFilm,
+  createOne,
+  deleteOne,
+  readAll,
+  readOne,
+  updateOne,
+  updateOrCreateOne,
 } from "../services/films";
 
 const router = Router();
 
-//afficher les films selon la duree min, s'il y'a ce parametre  //apres il y'a dans REST des trucs qui permettent de faire des test avec ça
+const expectedKeys = [
+  "title",
+  "director",
+  "duration",
+  "budget",
+  "description",
+  "imageUrl",
+];
+
+// Read all films, filtered by minimum-duration if the query param exists
 router.get("/", (req, res) => {
-  const minimumDuration = Number(req.query["minimum-duration"]);
-  const films = readAllFilms(minimumDuration);
-  return res.json(films);
+  const minDuration =
+    "minimum-duration" in req.query
+      ? Number(req.query["minimum-duration"])
+      : undefined;
+
+  if (minDuration !== undefined && (isNaN(minDuration) || minDuration <= 0)) {
+    return res.sendStatus(400);
+  }
+
+  const filteredFilms = readAll(minDuration);
+
+  return res.send(filteredFilms);
 });
 
-//afficher les films selon l'id(dans l'url )
+// Read a film by id
 router.get("/:id", (req, res) => {
   const id = Number(req.params.id);
-  const film = readOneFilm(id);
-  if (!film) {
+
+  if (isNaN(id)) {
+    return res.sendStatus(400);
+  }
+
+  const film = readOne(id);
+
+  if (film === undefined) {
     return res.sendStatus(404);
   }
-  return res.json(film);
+
+  return res.send(film);
 });
 
+// Create a new film
 router.post("/", (req, res) => {
   const body: unknown = req.body;
+
   if (
     !body ||
     typeof body !== "object" ||
@@ -52,21 +83,41 @@ router.post("/", (req, res) => {
     return res.sendStatus(400);
   }
 
-  const newFilm = body as NewFilm; //avoir ts NewFilm, mettre dans l'import NewFilm
+  // Challenge of ex1.4 : To be complete, we should check that the keys of the body object are only the ones we expect
+  if (!containsOnlyExpectedKeys(body, expectedKeys)) {
+    return res.sendStatus(400);
+  }
+  // End of challenge
 
-  const films = createNewFilm(newFilm);
-  return res.json(films);
+  const newFilm = body as NewFilm;
+
+  const addedFilm = createOne(newFilm);
+
+  if (!addedFilm) {
+    return res.sendStatus(409);
+  }
+
+  return res.json(addedFilm);
 });
 
+// Delete a film by id
 router.delete("/:id", (req, res) => {
   const id = Number(req.params.id);
-  const deletedFilm = deleteOneFilm(id);
+
+  if (isNaN(id)) {
+    return res.sendStatus(400);
+  }
+
+  const deletedFilm = deleteOne(id);
+
   if (!deletedFilm) {
     return res.sendStatus(404);
   }
-  return res.json(deletedFilm);
+
+  return res.send(deletedFilm);
 });
 
+// Update on or multiple props of a film
 router.patch("/:id", (req, res) => {
   const id = Number(req.params.id);
 
@@ -95,7 +146,14 @@ router.patch("/:id", (req, res) => {
   ) {
     return res.sendStatus(400);
   }
-  const updatedFilm = updateFilm(id, body);
+
+  // Challenge of ex1.6 : To be complete, we should check that the keys of the body object are only the ones we expect
+  if (!containsOnlyExpectedKeys(body, expectedKeys)) {
+    return res.sendStatus(400);
+  }
+  // End of challenge
+
+  const updatedFilm = updateOne(id, body);
 
   if (!updatedFilm) {
     return res.sendStatus(404);
@@ -104,6 +162,7 @@ router.patch("/:id", (req, res) => {
   return res.send(updatedFilm);
 });
 
+// Update a film only if all properties are given or create it if it does not exist and the id is not existant
 router.put("/:id", (req, res) => {
   const body: unknown = req.body;
 
@@ -129,16 +188,21 @@ router.put("/:id", (req, res) => {
     return res.sendStatus(400);
   }
 
+  // Challenge of ex1.6 : To be complete, we should check that the keys of the body object are only the ones we expect
+  if (!containsOnlyExpectedKeys(body, expectedKeys)) {
+    return res.sendStatus(400);
+  }
+
   const id = Number(req.params.id);
 
   if (isNaN(id)) {
     return res.sendStatus(400);
   }
 
-  const createdOrUpdatedFilm = updateOrCreateFilm(id, body as NewFilm);
+  const createdOrUpdatedFilm = updateOrCreateOne(id, body as NewFilm);
 
   if (!createdOrUpdatedFilm) {
-    return res.sendStatus(409); 
+    return res.sendStatus(409); // Film already exists
   }
 
   return res.send(createdOrUpdatedFilm);

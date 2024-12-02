@@ -1,16 +1,14 @@
 import express from "express";
 
-
-
-import filmsRouter from "./routes/films";
+import pizzaRouter from "./routes/films";
+import { requestCounterMiddleware } from "./utils/counter";
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-
-//1.2
+/* Middleware to count the number of GET requests */
 let requestCount = 0;
 app.use((req, _res, next) => {
   if (req.method === "GET") {
@@ -19,7 +17,10 @@ app.use((req, _res, next) => {
   }
   next();
 });
-//end1.2
-app.use("/films", filmsRouter);
+
+/* Challenge of ex1.2 */
+app.use(requestCounterMiddleware);
+
+app.use("/films", pizzaRouter);
 
 export default app;

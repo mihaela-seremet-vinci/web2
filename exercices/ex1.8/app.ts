@@ -1,6 +1,6 @@
 import express from "express";
 
-import pizzaRouter from "./routes/films";
+import filmRouter from "./routes/films";
 import { requestCounterMiddleware } from "./utils/counter";
 
 const app = express();
@@ -21,6 +21,6 @@ app.use((req, _res, next) => {
 /* Challenge of ex1.2 */
 app.use(requestCounterMiddleware);
 
-app.use("/films", pizzaRouter);
+app.use("/films", filmRouter);
 
 export default app;

@@ -1,0 +1,108 @@
+@baseUrl = http://localhost:3000
+
+### Read all films
+GET {{baseUrl}}/films
+
+### Read all films with minimum-duration of 140min
+GET {{baseUrl}}/films/?minimum-duration=130
+
+### Try to read films with wrong minimum-duration
+GET {{baseUrl}}/films/?minimum-duration=0
+
+### Read film with ID == 1
+GET {{baseUrl}}/films/1
+
+### Read film which does not exist
+GET {{baseUrl}}/films/500
+
+
+
+
+###Regiter a user manager and get the token
+# @name manager
+POST {{baseUrl}}/auths/register
+Content-Type: application/json
+
+{
+    "username":"manager",
+    "password":"manager"
+}
+
+
+### Define a file variable to simplify the access to the token of manager
+@managerToken = {{manager.response.body.token}}
+
+
+
+### Create a new user
+# @name me
+POST {{baseUrl}}/auths/register
+Content-Type: application/json
+
+{
+    "username":"me",
+    "password":"me"
+}
+
+### Login the user
+# @name me
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+    "username":"me",
+    "password":"me"
+}
+
+
+### Create a film with the user me
+POST {{baseUrl}}/films
+Content-Type: application/json
+Authorization: {{me.response.body.token}}
+
+{
+    "title":"Star Wars: The Phantom Menace (Episode I)",
+    "duration": 136,
+    "director": "George Lucas",
+    "budget": 115,
+    "imageUrl":"https://upload.wikimedia.org/wikipedia/en/4/40/Star_Wars_Phantom_Menace_poster.jpg"
+}
+
+
+### Create a film with user not logged
+POST {{baseUrl}}/films
+Content-Type: application/json
+Authorization: {{managerToken}}
+
+{
+    "title":"Star Wars: The Phantom Menace (Episode II)",
+    "duration": 155,
+    "director": "George Lucas",
+    "budget": 115,
+    "imageUrl":"https://upload.wikimedia.org/wikipedia/en/4/40/Star_Wars_Phantom_Menace_poster.jpg"
+}
+
+
+### Update the film with ID == 1, logged in 
+PUT {{baseUrl}}/films/1
+Content-Type: application/json
+Authorization: {{me.response.body.token}}
+
+{
+    "title":"Star Wars: Episode II – Attack of the Clones",
+    "duration": 142,
+    "director": "George Lucas",
+    "budget": 115
+}
+
+### Update the film with ID == 1
+PUT {{baseUrl}}/films/1
+Content-Type: application/json
+
+{
+    "title":"Star Wars: Episode II – Attack of the Clones",
+    "duration": 142,
+    "director": "George Lucas",
+    "budget": 115
+}
+

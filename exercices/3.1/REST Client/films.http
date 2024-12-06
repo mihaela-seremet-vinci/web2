@@ -1,5 +1,7 @@
 @baseUrl = http://localhost:3000
 
+
+
 ### Read all films
 GET {{baseUrl}}/films
 
@@ -14,7 +16,6 @@ GET {{baseUrl}}/films/1
 
 ### Read film which does not exist
 GET {{baseUrl}}/films/500
-
 
 
 
